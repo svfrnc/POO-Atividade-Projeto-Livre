@@ -2,16 +2,13 @@ package view;
 
 import model.dao.ArquitetoDAO;
 import model.dao.ClienteDAO;
-import model.dao.ServicoDAO;
 import model.entities.Arquiteto;
 import model.entities.Cliente;
-import model.entities.Servico;
 import model.entities.Usuario;
 
 public class AuthView {
     private ArquitetoDAO arquitetoDAO = new ArquitetoDAO();
     private ClienteDAO clienteDAO = new ClienteDAO();
-    private ServicoDAO servicoDAO = new ServicoDAO();
 
     // Controle de Sessão Global
     private static Usuario usuarioLogado = null;

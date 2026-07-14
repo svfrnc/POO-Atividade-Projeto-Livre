@@ -36,7 +36,7 @@ public class AuthTemplate {
     private void realizarLogin() {
         ConsoleUtil.pularLinha();
         System.out.println("--- LOGIN ---");
-        String login = ConsoleUtil.lerString("Login: ");
+        String login = ConsoleUtil.lerString("Login: ").toLowerCase();
         String senha = ConsoleUtil.lerString("Senha: ");
 
         if (authView.login(login, senha)) {
