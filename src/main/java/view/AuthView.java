@@ -18,10 +18,7 @@ public class AuthView {
 
     public void inicializarBancoSeVazio() {
         if (arquitetoDAO.listar().isEmpty()) {
-            arquitetoDAO.inserir(new Arquiteto(0, "admin", "admin123", "CAU-0000"));
-            clienteDAO.inserir(new Cliente(0, "maxwell", "123", "Maxwell Dantas"));
-            servicoDAO.inserir(new Servico(0, "Projeto arquitetônico", 50.00));
-            servicoDAO.inserir(new Servico(0, "Reforma pedreiro", 120.00));
+            arquitetoDAO.inserir(new Arquiteto(0, "admin", "admin", "CAU-0000"));
         }
     }
 
