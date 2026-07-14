@@ -4,5 +4,5 @@ import model.entities.EtapaServico;
 import java.util.List;
 
 public class EtapaServicoDAO extends DAO<EtapaServico> {
-    public EtapaServicoDAO() { super("etapas_servicos.json", new TypeToken<List<EtapaServico>>(){}.getType()); }
+    public EtapaServicoDAO() { super("data/etapas_servicos.json", new TypeToken<List<EtapaServico>>(){}.getType()); }
 }

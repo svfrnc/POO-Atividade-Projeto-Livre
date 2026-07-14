@@ -4,5 +4,5 @@ import model.entities.Projeto;
 import java.util.List;
 
 public class ProjetoDAO extends DAO<Projeto> {
-    public ProjetoDAO() { super("projetos.json", new TypeToken<List<Projeto>>(){}.getType()); }
+    public ProjetoDAO() { super("data/projetos.json", new TypeToken<List<Projeto>>(){}.getType()); }
 }

@@ -4,5 +4,5 @@ import model.entities.Arquiteto;
 import java.util.List;
 
 public class ArquitetoDAO extends DAO<Arquiteto> {
-    public ArquitetoDAO() { super("arquitetos.json", new TypeToken<List<Arquiteto>>(){}.getType()); }
+    public ArquitetoDAO() { super("data/arquitetos.json", new TypeToken<List<Arquiteto>>(){}.getType()); }
 }

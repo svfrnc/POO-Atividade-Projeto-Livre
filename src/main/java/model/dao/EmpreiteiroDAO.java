@@ -4,5 +4,5 @@ import model.entities.Empreiteiro;
 import java.util.List;
 
 public class EmpreiteiroDAO extends DAO<Empreiteiro> {
-    public EmpreiteiroDAO() { super("empreiteiros.json", new TypeToken<List<Empreiteiro>>(){}.getType()); }
+    public EmpreiteiroDAO() { super("data/empreiteiros.json", new TypeToken<List<Empreiteiro>>(){}.getType()); }
 }
