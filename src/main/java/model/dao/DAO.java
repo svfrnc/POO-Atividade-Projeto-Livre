@@ -16,6 +16,17 @@ public abstract class DAO<T extends Entidade> {
     public DAO(String arquivo, Type tipoLista) {
         this.arquivo = arquivo;
         this.tipoLista = tipoLista;
+
+        // 1. Pega o caminho do arquivo (ex: "data/servicos.json") e extrai a pasta "data"
+        File file = new File(arquivo);
+        File parentDir = file.getParentFile();
+
+        // 2. Se houver uma pasta no caminho e ela ainda não existir no computador, cria automaticamente
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+
+        // 3. Inicializa o Gson mantendo o suporte ao LocalDate
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
                 .setPrettyPrinting()
