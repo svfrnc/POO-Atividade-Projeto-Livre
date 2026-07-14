@@ -1,10 +1,10 @@
 package template;
 
-import model.entities.Cliente;
-import model.entities.Projeto;
-import model.entities.Servico;
+import model.entities.*;
 import model.enums.StatusProjeto;
 import view.AdminView;
+
+import java.util.List;
 
 public class ArquitetoTemplate {
     private AdminView adminView = new AdminView();
@@ -14,251 +14,295 @@ public class ArquitetoTemplate {
         while (opcao != 0) {
             ConsoleUtil.pularLinha();
             System.out.println("=====================================");
-            System.out.println("    PAINEL DO ARQUITETO (ADMIN)      ");
+            System.out.println("      PAINEL DO ARQUITETO (ADMIN)    ");
             System.out.println("=====================================");
-            System.out.println("--- CLIENTES ---");
-            System.out.println("1. Cadastrar Cliente");
-            System.out.println("2. Listar Clientes");
-            System.out.println("3. Editar Cliente");
-            System.out.println("4. Excluir Cliente");
-            System.out.println("--- PROJETOS ---");
-            System.out.println("5. Cadastrar Projeto");
-            System.out.println("6. Listar Projetos");
-            System.out.println("7. Editar Projeto");
-            System.out.println("8. Excluir Projeto");
-            System.out.println("--- CATÁLOGO DE SERVIÇOS ---");
-            System.out.println("9. Cadastrar Serviço");
-            System.out.println("10. Listar Serviços");
-            System.out.println("11. Editar Serviço");
-            System.out.println("12. Excluir Serviço");
+            System.out.println("1. Módulo de Clientes");
+            System.out.println("2. Módulo de Projetos");
+            System.out.println("3. Módulo de Etapas");
+            System.out.println("4. Módulo de Serviços (Catálogo)");
+            System.out.println("5. Módulo de Vínculos (Etapa-Serviço)");
+            System.out.println("6. Módulo de Materiais");
+            System.out.println("7. Módulo de Empreiteiros");
             System.out.println("0. Fazer Logout");
 
-            opcao = ConsoleUtil.lerInt("Escolha uma opção: ");
+            opcao = ConsoleUtil.lerInt("Escolha um módulo: ");
 
             try {
                 switch (opcao) {
-                    case 1 -> cadastrarCliente();
-                    case 2 -> listarClientes();
-                    case 3 -> editarCliente();
-                    case 4 -> excluirCliente();
-
-                    case 5 -> cadastrarProjeto();
-                    case 6 -> listarProjetos();
-                    case 7 -> editarProjeto();
-                    case 8 -> excluirProjeto();
-
-                    case 9 -> cadastrarServico();
-                    case 10 -> listarServicos();
-                    case 11 -> editarServico();
-                    case 12 -> excluirServico();
-
+                    case 1 -> menuClientes();
+                    case 2 -> menuProjetos();
+                    case 3 -> menuEtapas();
+                    case 4 -> menuServicos();
+                    case 5 -> menuVinculos();
+                    case 6 -> menuMateriais();
+                    case 7 -> menuEmpreiteiros();
                     case 0 -> System.out.println("Saindo do painel admin...");
                     default -> System.out.println("❌ Opção inválida.");
                 }
-            } catch (IllegalArgumentException e) {
-                System.out.println("❌ Erro de Validação: " + e.getMessage());
             } catch (Exception e) {
-                System.out.println("❌ Ocorreu um erro inesperado: " + e.getMessage());
+                System.out.println("❌ Erro: " + e.getMessage());
             }
         }
     }
 
     // ==========================================
-    // MÉTODOS DE TELA: CLIENTES
+    // 1. MÓDULO DE CLIENTES
     // ==========================================
-    private void cadastrarCliente() {
-        System.out.println("\n-- CADASTRAR NOVO CLIENTE --");
-        String login = ConsoleUtil.lerString("Login do Cliente: ");
-        String senha = ConsoleUtil.lerString("Senha Provisória: ");
-        String nome = ConsoleUtil.lerString("Nome Completo: ");
-
-        adminView.cadastrarCliente(login, senha, nome);
-        System.out.println("✅ Cliente registrado com sucesso no sistema!");
+    private void menuClientes() {
+        int op = -1;
+        while(op != 0) {
+            System.out.println("\n--- MÓDULO DE CLIENTES ---");
+            System.out.println("1. Cadastrar | 2. Listar | 3. Editar | 4. Excluir | 5. Buscar por Nome | 0. Voltar");
+            op = ConsoleUtil.lerInt("Opção: ");
+            switch(op) {
+                case 1 -> {
+                    String login = ConsoleUtil.lerString("Login: ");
+                    String senha = ConsoleUtil.lerString("Senha: ");
+                    String nome = ConsoleUtil.lerString("Nome Completo: ");
+                    adminView.cadastrarCliente(login, senha, nome);
+                    System.out.println("✅ Salvo com sucesso!");
+                }
+                case 2 -> listarClientes();
+                case 3 -> {
+                    listarClientes();
+                    Cliente c = adminView.buscarClientePorId(ConsoleUtil.lerInt("ID para Editar: "));
+                    if(c != null) {
+                        String nNome = ConsoleUtil.lerString("Novo Nome ["+c.getNome()+"]: ");
+                        if(!nNome.isEmpty()) c.setNome(nNome);
+                        adminView.atualizarCliente(c);
+                        System.out.println("✅ Atualizado!");
+                    }
+                }
+                case 4 -> {
+                    listarClientes();
+                    adminView.excluirCliente(ConsoleUtil.lerInt("ID para Excluir: "));
+                    System.out.println("✅ Excluído!");
+                }
+                case 5 -> {
+                    String termo = ConsoleUtil.lerString("Digite parte do nome: ");
+                    List<Cliente> res = adminView.buscarClientePorNome(termo);
+                    res.forEach(c -> System.out.printf("ID: %d | Nome: %s\n", c.getId(), c.getNome()));
+                }
+            }
+        }
     }
-
     private void listarClientes() {
-        System.out.println("\n-- LISTA DE CLIENTES --");
-        for (Cliente c : adminView.listarTodosClientes()) {
-            System.out.printf("ID: %d | Nome: %s | Login: %s\n", c.getId(), c.getNome(), c.getLogin());
-        }
-    }
-
-    private void editarCliente() {
-        System.out.println("\n-- EDITAR CLIENTE --");
-        listarClientes();
-        ConsoleUtil.pularLinha();
-
-        int id = ConsoleUtil.lerInt("Digite o ID do Cliente que deseja editar: ");
-        Cliente c = adminView.buscarClientePorId(id);
-
-        if (c == null) {
-            System.out.println("❌ Cliente não encontrado!");
-            return;
-        }
-
-        System.out.println("Deixe em branco caso não queira alterar o campo.");
-        String novoNome = ConsoleUtil.lerString("Novo Nome [" + c.getNome() + "]: ");
-        String novaSenha = ConsoleUtil.lerString("Nova Senha: ");
-
-        if (!novoNome.isEmpty()) c.setNome(novoNome);
-        if (!novaSenha.isEmpty()) c.setSenha(novaSenha);
-
-        adminView.atualizarCliente(c);
-        System.out.println("✅ Cliente atualizado com sucesso!");
-    }
-
-    private void excluirCliente() {
-        System.out.println("\n-- EXCLUIR CLIENTE --");
-        listarClientes();
-        ConsoleUtil.pularLinha();
-
-        int id = ConsoleUtil.lerInt("Digite o ID do Cliente que deseja excluir: ");
-        Cliente c = adminView.buscarClientePorId(id);
-
-        if (c == null) {
-            System.out.println("❌ Cliente não encontrado!");
-            return;
-        }
-
-        adminView.excluirCliente(id);
-        System.out.println("✅ Cliente excluído com sucesso!");
+        adminView.listarTodosClientes().forEach(c -> System.out.printf("ID: %d | Nome: %s\n", c.getId(), c.getNome()));
     }
 
     // ==========================================
-    // MÉTODOS DE TELA: PROJETOS
+    // 2. MÓDULO DE PROJETOS
     // ==========================================
-    private void cadastrarProjeto() {
-        System.out.println("\n-- NOVO PROJETO --");
-        String titulo = ConsoleUtil.lerString("Título do Projeto: ");
-        int idCliente = ConsoleUtil.lerInt("ID do Cliente Vinculado: ");
-        var dataPrev = ConsoleUtil.lerData("Data de Previsão de Entrega (dd/MM/yyyy): ");
-
-        adminView.cadastrarProjeto(titulo, idCliente, dataPrev);
-        System.out.println("✅ Projeto cadastrado com sucesso!");
-    }
-
-    private void listarProjetos() {
-        System.out.println("\n-- LISTA GLOBAL DE PROJETOS --");
-        for (Projeto p : adminView.listarTodosProjetos()) {
-            System.out.printf("ID: %d | Cliente ID: %d | Título: %s | Status: %s\n",
-                    p.getId(), p.getIdCliente(), p.getTitulo(), p.getStatus());
-        }
-    }
-
-    private void editarProjeto() {
-        System.out.println("\n-- EDITAR PROJETO --");
-        listarProjetos();
-        ConsoleUtil.pularLinha();
-
-        int id = ConsoleUtil.lerInt("Digite o ID do Projeto que deseja editar: ");
-        Projeto p = adminView.buscarProjetoPorId(id);
-
-        if (p == null) {
-            System.out.println("❌ Projeto não encontrado!");
-            return;
-        }
-
-        String novoTitulo = ConsoleUtil.lerString("Novo Título [" + p.getTitulo() + "] (Ou enter para manter): ");
-        if (!novoTitulo.isEmpty()) p.setTitulo(novoTitulo);
-
-        System.out.println("Status atual: " + p.getStatus());
-        System.out.println("1. PLANEJAMENTO | 2. APROVADO | 3. EM EXECUCAO | 4. CONCLUIDO | 0. Manter Atual");
-        int opStatus = ConsoleUtil.lerInt("Escolha o novo status: ");
-        switch (opStatus) {
-            case 1 -> p.setStatus(StatusProjeto.PLANEJAMENTO);
-            case 2 -> p.setStatus(StatusProjeto.APROVADO);
-            case 3 -> p.setStatus(StatusProjeto.EM_EXECUCAO);
-            case 4 -> p.setStatus(StatusProjeto.CONCLUIDO);
-        }
-
-        adminView.atualizarProjeto(p);
-        System.out.println("✅ Projeto atualizado com sucesso!");
-    }
-
-    private void excluirProjeto() {
-        System.out.println("\n-- EXCLUIR PROJETO --");
-        listarProjetos();
-        ConsoleUtil.pularLinha();
-
-        int id = ConsoleUtil.lerInt("Digite o ID do Projeto que deseja excluir: ");
-        Projeto p = adminView.buscarProjetoPorId(id);
-
-        if (p == null) {
-            System.out.println("❌ Projeto não encontrado!");
-            return;
-        }
-
-        adminView.excluirProjeto(id);
-        System.out.println("✅ Projeto excluído com sucesso!");
-    }
-
-    // ==========================================
-    // MÉTODOS DE TELA: SERVIÇOS
-    // ==========================================
-    private void cadastrarServico() {
-        System.out.println("\n-- NOVO SERVIÇO NO CATÁLOGO --");
-        String desc = ConsoleUtil.lerString("Descrição do Serviço: ");
-        double valor = ConsoleUtil.lerDouble("Valor base por medida (R$): ");
-
-        adminView.cadastrarServicoBase(desc, valor);
-        System.out.println("✅ Serviço adicionado ao catálogo!");
-    }
-
-    private void listarServicos() {
-        System.out.println("\n-- CATÁLOGO DE SERVIÇOS --");
-        for (Servico s : adminView.listarCatalogoServicos()) {
-            System.out.printf("ID: %d | Descrição: %s | Valor M.: R$%.2f\n",
-                    s.getId(), s.getDescricao(), s.getValorMedida());
-        }
-    }
-
-    private void editarServico() {
-        System.out.println("\n-- EDITAR SERVIÇO --");
-        listarServicos(); // UX: Mostra o catálogo de serviços antes de pedir o ID
-        ConsoleUtil.pularLinha();
-
-        int id = ConsoleUtil.lerInt("Digite o ID do Serviço que deseja editar: ");
-        Servico s = adminView.buscarServicoPorId(id);
-
-        if (s == null) {
-            System.out.println("❌ Serviço não encontrado!");
-            return;
-        }
-
-        System.out.println("Deixe em branco caso não queira alterar o campo.");
-        String novaDescricao = ConsoleUtil.lerString("Nova Descrição [" + s.getDescricao() + "]: ");
-
-        // Para o double, usamos uma String temporária para saber se o utilizador premiu Enter
-        String valorStr = ConsoleUtil.lerString("Novo Valor por Medida [R$" + String.format("%.2f", s.getValorMedida()) + "]: ");
-
-        if (!novaDescricao.isEmpty()) s.setDescricao(novaDescricao);
-        if (!valorStr.isEmpty()) {
-            try {
-                double novoValor = Double.parseDouble(valorStr.replace(",", "."));
-                s.setValorMedida(novoValor);
-            } catch (NumberFormatException e) {
-                System.out.println("❌ Valor inválido introduzido. O valor antigo foi mantido.");
+    private void menuProjetos() {
+        int op = -1;
+        while(op != 0) {
+            System.out.println("\n--- MÓDULO DE PROJETOS ---");
+            System.out.println("1. Cadastrar | 2. Listar | 3. Editar | 4. Excluir | 5. Buscar por Título | 0. Voltar");
+            op = ConsoleUtil.lerInt("Opção: ");
+            switch(op) {
+                case 1 -> {
+                    String titulo = ConsoleUtil.lerString("Título: ");
+                    int idCli = ConsoleUtil.lerInt("ID do Cliente: ");
+                    var data = ConsoleUtil.lerData("Data Previsão (dd/MM/yyyy): ");
+                    adminView.cadastrarProjeto(titulo, idCli, data);
+                    System.out.println("✅ Salvo!");
+                }
+                case 2 -> listarProjetos();
+                case 3 -> {
+                    listarProjetos();
+                    Projeto p = adminView.buscarProjetoPorId(ConsoleUtil.lerInt("ID para Editar: "));
+                    if(p != null) {
+                        String nTit = ConsoleUtil.lerString("Novo Título ["+p.getTitulo()+"]: ");
+                        if(!nTit.isEmpty()) p.setTitulo(nTit);
+                        adminView.atualizarProjeto(p);
+                        System.out.println("✅ Atualizado!");
+                    }
+                }
+                case 4 -> {
+                    listarProjetos();
+                    adminView.excluirProjeto(ConsoleUtil.lerInt("ID para Excluir: "));
+                    System.out.println("✅ Excluído!");
+                }
+                case 5 -> {
+                    String termo = ConsoleUtil.lerString("Digite parte do título: ");
+                    List<Projeto> res = adminView.buscarProjetoPorTitulo(termo);
+                    res.forEach(p -> System.out.printf("ID: %d | Título: %s\n", p.getId(), p.getTitulo()));
+                }
             }
         }
-
-        adminView.atualizarServico(s);
-        System.out.println("✅ Serviço atualizado com sucesso!");
+    }
+    private void listarProjetos() {
+        adminView.listarTodosProjetos().forEach(p -> System.out.printf("ID: %d | Cliente ID: %d | Titulo: %s\n", p.getId(), p.getIdCliente(), p.getTitulo()));
     }
 
-    private void excluirServico() {
-        System.out.println("\n-- EXCLUIR SERVIÇO --");
-        listarServicos(); // UX: Mostra o catálogo antes de pedir o ID
-        ConsoleUtil.pularLinha();
-
-        int id = ConsoleUtil.lerInt("Digite o ID do Serviço que deseja remover do catálogo: ");
-        Servico s = adminView.buscarServicoPorId(id);
-
-        if (s == null) {
-            System.out.println("❌ Serviço não encontrado!");
-            return;
+    // ==========================================
+    // 3. MÓDULO DE ETAPAS
+    // ==========================================
+    private void menuEtapas() {
+        int op = -1;
+        while(op != 0) {
+            System.out.println("\n--- MÓDULO DE ETAPAS ---");
+            System.out.println("1. Cadastrar | 2. Listar | 3. Editar | 4. Excluir | 0. Voltar");
+            op = ConsoleUtil.lerInt("Opção: ");
+            switch(op) {
+                case 1 -> {
+                    int idProj = ConsoleUtil.lerInt("ID do Projeto: ");
+                    String desc = ConsoleUtil.lerString("Descrição da Etapa: ");
+                    var data = ConsoleUtil.lerData("Data Limite (dd/MM/yyyy): ");
+                    adminView.cadastrarEtapa(idProj, desc, data);
+                    System.out.println("✅ Salvo!");
+                }
+                case 2 -> listarEtapas();
+                case 3 -> {
+                    listarEtapas();
+                    Etapa e = adminView.buscarEtapaPorId(ConsoleUtil.lerInt("ID para Editar: "));
+                    if(e != null) {
+                        String nDesc = ConsoleUtil.lerString("Nova Descrição ["+e.getDescricao()+"]: ");
+                        if(!nDesc.isEmpty()) e.setDescricao(nDesc);
+                        adminView.atualizarEtapa(e);
+                        System.out.println("✅ Atualizado!");
+                    }
+                }
+                case 4 -> {
+                    listarEtapas();
+                    adminView.excluirEtapa(ConsoleUtil.lerInt("ID para Excluir: "));
+                    System.out.println("✅ Excluído!");
+                }
+            }
         }
+    }
+    private void listarEtapas() {
+        adminView.listarTodasEtapas().forEach(e -> System.out.printf("ID: %d | Proj ID: %d | Desc: %s\n", e.getId(), e.getIdProjeto(), e.getDescricao()));
+    }
 
-        adminView.excluirServico(id);
-        System.out.println("✅ Serviço removido do catálogo com sucesso!");
+    // ==========================================
+    // 4. MÓDULO DE SERVIÇOS (CATÁLOGO)
+    // ==========================================
+    private void menuServicos() {
+        int op = -1;
+        while(op != 0) {
+            System.out.println("\n--- MÓDULO DE SERVIÇOS ---");
+            System.out.println("1. Cadastrar | 2. Listar | 3. Editar | 4. Excluir | 5. Buscar por Nome | 0. Voltar");
+            op = ConsoleUtil.lerInt("Opção: ");
+            switch(op) {
+                case 1 -> {
+                    String desc = ConsoleUtil.lerString("Descrição: ");
+                    double val = ConsoleUtil.lerDouble("Valor R$: ");
+                    adminView.cadastrarServicoBase(desc, val);
+                    System.out.println("✅ Salvo!");
+                }
+                case 2 -> listarServ();
+                case 3 -> {
+                    listarServ();
+                    Servico s = adminView.buscarServicoPorId(ConsoleUtil.lerInt("ID para Editar: "));
+                    if(s != null) {
+                        String nDesc = ConsoleUtil.lerString("Nova Descrição ["+s.getDescricao()+"]: ");
+                        if(!nDesc.isEmpty()) s.setDescricao(nDesc);
+                        adminView.atualizarServico(s);
+                        System.out.println("✅ Atualizado!");
+                    }
+                }
+                case 4 -> {
+                    listarServ();
+                    adminView.excluirServico(ConsoleUtil.lerInt("ID para Excluir: "));
+                    System.out.println("✅ Excluído!");
+                }
+                case 5 -> {
+                    String termo = ConsoleUtil.lerString("Digite parte da descrição: ");
+                    adminView.buscarServicoPorDescricao(termo).forEach(s -> System.out.printf("ID: %d | Desc: %s\n", s.getId(), s.getDescricao()));
+                }
+            }
+        }
+    }
+    private void listarServ() {
+        adminView.listarCatalogoServicos().forEach(s -> System.out.printf("ID: %d | Desc: %s | R$%.2f\n", s.getId(), s.getDescricao(), s.getValorMedida()));
+    }
+
+    // ==========================================
+    // 5. MÓDULO DE VÍNCULOS (ETAPA X SERVIÇO)
+    // ==========================================
+    private void menuVinculos() {
+        int op = -1;
+        while(op != 0) {
+            System.out.println("\n--- VINCULAR SERVIÇO À ETAPA ---");
+            System.out.println("1. Cadastrar Vínculo | 2. Listar Vínculos | 3. Excluir | 0. Voltar");
+            op = ConsoleUtil.lerInt("Opção: ");
+            switch(op) {
+                case 1 -> {
+                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa: ");
+                    int idServ = ConsoleUtil.lerInt("ID do Serviço: ");
+                    double qtd = ConsoleUtil.lerDouble("Quantidade/Área (Ex: 10.5): ");
+                    adminView.vincularServico(idEtapa, idServ, qtd);
+                    System.out.println("✅ Vinculado com sucesso!");
+                }
+                case 2 -> adminView.listarVinculos().forEach(v -> System.out.printf("Vínculo ID: %d | Etapa: %d | Serviço: %d | Qtd: %.2f\n", v.getId(), v.getIdEtapa(), v.getIdServico(), v.getQuantidade()));
+                case 3 -> adminView.excluirVinculo(ConsoleUtil.lerInt("ID do Vínculo a Excluir: "));
+            }
+        }
+    }
+
+    // ==========================================
+    // 6. MÓDULO DE MATERIAIS
+    // ==========================================
+    private void menuMateriais() {
+        int op = -1;
+        while(op != 0) {
+            System.out.println("\n--- MÓDULO DE MATERIAIS ---");
+            System.out.println("1. Cadastrar | 2. Listar | 3. Editar | 4. Excluir | 0. Voltar");
+            op = ConsoleUtil.lerInt("Opção: ");
+            switch(op) {
+                case 1 -> {
+                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa: ");
+                    String desc = ConsoleUtil.lerString("Material: ");
+                    double qtd = ConsoleUtil.lerDouble("Quantidade: ");
+                    String un = ConsoleUtil.lerString("Unidade (Ex: Saco, Litro): ");
+                    adminView.cadastrarMaterial(idEtapa, desc, qtd, un);
+                    System.out.println("✅ Salvo!");
+                }
+                case 2 -> adminView.listarMateriais().forEach(m -> System.out.printf("ID: %d | Etapa ID: %d | Material: %s | Qtd: %.2f %s\n", m.getId(), m.getIdEtapa(), m.getDescricao(), m.getQuantidade(), m.getUnidade()));
+                case 3 -> {
+                    Material m = adminView.buscarMaterialPorId(ConsoleUtil.lerInt("ID para Editar: "));
+                    if(m != null) {
+                        String nDesc = ConsoleUtil.lerString("Nova Descrição ["+m.getDescricao()+"]: ");
+                        if(!nDesc.isEmpty()) m.setDescricao(nDesc);
+                        adminView.atualizarMaterial(m);
+                        System.out.println("✅ Atualizado!");
+                    }
+                }
+                case 4 -> adminView.excluirMaterial(ConsoleUtil.lerInt("ID para Excluir: "));
+            }
+        }
+    }
+
+    // ==========================================
+    // 7. MÓDULO DE EMPREITEIROS
+    // ==========================================
+    private void menuEmpreiteiros() {
+        int op = -1;
+        while(op != 0) {
+            System.out.println("\n--- MÓDULO DE EMPREITEIROS ---");
+            System.out.println("1. Cadastrar | 2. Listar | 3. Editar | 4. Excluir | 0. Voltar");
+            op = ConsoleUtil.lerInt("Opção: ");
+            switch(op) {
+                case 1 -> {
+                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa: ");
+                    String nome = ConsoleUtil.lerString("Nome da Empresa: ");
+                    String cnpj = ConsoleUtil.lerString("CNPJ: ");
+                    adminView.cadastrarEmpreiteiro(idEtapa, nome, cnpj);
+                    System.out.println("✅ Salvo!");
+                }
+                case 2 -> adminView.listarEmpreiteiros().forEach(e -> System.out.printf("ID: %d | Etapa ID: %d | Empresa: %s | CNPJ: %s\n", e.getId(), e.getIdEtapa(), e.getNomeEmpresa(), e.getCnpj()));
+                case 3 -> {
+                    Empreiteiro e = adminView.buscarEmpreiteiroPorId(ConsoleUtil.lerInt("ID para Editar: "));
+                    if(e != null) {
+                        String nNome = ConsoleUtil.lerString("Nova Empresa ["+e.getNomeEmpresa()+"]: ");
+                        if(!nNome.isEmpty()) e.setNomeEmpresa(nNome);
+                        adminView.atualizarEmpreiteiro(e);
+                        System.out.println("✅ Atualizado!");
+                    }
+                }
+                case 4 -> adminView.excluirEmpreiteiro(ConsoleUtil.lerInt("ID para Excluir: "));
+            }
+        }
     }
 }
