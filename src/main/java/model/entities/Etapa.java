@@ -1,4 +1,5 @@
 package model.entities;
+
 import java.time.LocalDate;
 
 public class Etapa extends Entidade {
@@ -12,19 +13,37 @@ public class Etapa extends Entidade {
         setDescricao(descricao);
         setDataLimite(dataLimite);
     }
-    public int getIdProjeto() { return idProjeto; }
+
+    public int getIdProjeto() {
+        return idProjeto;
+    }
+
     public void setIdProjeto(int idProjeto) {
-        if (idProjeto <= 0) throw new IllegalArgumentException("ID Projeto inválido.");
+        if (idProjeto <= 0) {
+            throw new IllegalArgumentException("O ID do projeto vinculado deve ser maior que zero.");
+        }
         this.idProjeto = idProjeto;
     }
-    public String getDescricao() { return descricao; }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
     public void setDescricao(String descricao) {
-        if (descricao == null || descricao.trim().isEmpty()) throw new IllegalArgumentException("Descrição vazia.");
+        if (descricao == null || descricao.trim().isEmpty()) {
+            throw new IllegalArgumentException("A descrição da etapa não pode ser vazia.");
+        }
         this.descricao = descricao;
     }
-    public LocalDate getDataLimite() { return dataLimite; }
+
+    public LocalDate getDataLimite() {
+        return dataLimite;
+    }
+
     public void setDataLimite(LocalDate dataLimite) {
-        if (dataLimite == null) throw new IllegalArgumentException("Data limite inválida.");
+        if (dataLimite == null) {
+            throw new IllegalArgumentException("A data limite da etapa não pode ser nula.");
+        }
         this.dataLimite = dataLimite;
     }
 }

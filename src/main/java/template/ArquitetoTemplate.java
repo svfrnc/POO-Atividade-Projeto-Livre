@@ -4,10 +4,13 @@ import model.entities.*;
 import model.enums.StatusProjeto;
 import view.AdminView;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ArquitetoTemplate {
     private AdminView adminView = new AdminView();
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public void exibirMenu() {
         int opcao = -1;
@@ -65,29 +68,50 @@ public class ArquitetoTemplate {
                 case 2 -> listarClientes();
                 case 3 -> {
                     listarClientes();
-                    Cliente c = adminView.buscarClientePorId(ConsoleUtil.lerInt("ID para Editar: "));
-                    if(c != null) {
-                        String nNome = ConsoleUtil.lerString("Novo Nome ["+c.getNome()+"]: ");
-                        if(!nNome.isEmpty()) c.setNome(nNome);
-                        adminView.atualizarCliente(c);
-                        System.out.println("✅ Atualizado!");
+                    int id = ConsoleUtil.lerInt("ID do Cliente para Editar (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        Cliente c = adminView.buscarClientePorId(id);
+                        if(c != null) {
+                            String nNome = ConsoleUtil.lerString("Novo Nome ["+c.getNome()+"]: ");
+                            if(!nNome.isEmpty()) c.setNome(nNome);
+                            adminView.atualizarCliente(c);
+                            System.out.println("✅ Atualizado!");
+                        } else { System.out.println("❌ Cliente não encontrado!"); }
                     }
                 }
                 case 4 -> {
                     listarClientes();
-                    adminView.excluirCliente(ConsoleUtil.lerInt("ID para Excluir: "));
-                    System.out.println("✅ Excluído!");
+                    int id = ConsoleUtil.lerInt("ID do Cliente para Excluir (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        if(adminView.buscarClientePorId(id) != null) {
+                            adminView.excluirCliente(id);
+                            System.out.println("✅ Excluído!");
+                        } else { System.out.println("❌ Cliente não encontrado!"); }
+                    }
                 }
                 case 5 -> {
-                    String termo = ConsoleUtil.lerString("Digite parte do nome: ");
-                    List<Cliente> res = adminView.buscarClientePorNome(termo);
-                    res.forEach(c -> System.out.printf("ID: %d | Nome: %s\n", c.getId(), c.getNome()));
+                    String termo = ConsoleUtil.lerString("Digite parte do nome (ou '0' para cancelar): ");
+                    if (termo.equals("0")) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        List<Cliente> res = adminView.buscarClientePorNome(termo);
+                        if(res.isEmpty()) {
+                            System.out.println("Nenhum cliente encontrado.");
+                        } else {
+                            res.forEach(c -> System.out.printf("ID: %d | Nome: %s\n", c.getId(), c.getNome()));
+                        }
+                    }
                 }
             }
         }
     }
     private void listarClientes() {
-        adminView.listarTodosClientes().forEach(c -> System.out.printf("ID: %d | Nome: %s\n", c.getId(), c.getNome()));
+        System.out.println("\n-- LISTA DE CLIENTES --");
+        adminView.listarTodosClientes().forEach(c -> System.out.printf("ID: %d | Nome: %s | Login: %s\n", c.getId(), c.getNome(), c.getLogin()));
     }
 
     // ==========================================
@@ -97,42 +121,144 @@ public class ArquitetoTemplate {
         int op = -1;
         while(op != 0) {
             System.out.println("\n--- MÓDULO DE PROJETOS ---");
-            System.out.println("1. Cadastrar | 2. Listar | 3. Editar | 4. Excluir | 5. Buscar por Título | 0. Voltar");
+            System.out.println("1. Cadastrar | 2. Listar | 3. Editar Completo | 4. Excluir | 5. Buscar por Título | 6. Buscar por Status | 0. Voltar");
             op = ConsoleUtil.lerInt("Opção: ");
             switch(op) {
                 case 1 -> {
-                    String titulo = ConsoleUtil.lerString("Título: ");
-                    int idCli = ConsoleUtil.lerInt("ID do Cliente: ");
-                    var data = ConsoleUtil.lerData("Data Previsão (dd/MM/yyyy): ");
-                    adminView.cadastrarProjeto(titulo, idCli, data);
-                    System.out.println("✅ Salvo!");
+                    listarClientes();
+                    ConsoleUtil.pularLinha();
+                    int idCli = ConsoleUtil.lerInt("ID do Cliente Proprietário (0 para cancelar): ");
+                    if (idCli == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        String titulo = ConsoleUtil.lerString("Título do Projeto: ");
+                        var data = ConsoleUtil.lerData("Data Previsão (dd/MM/yyyy): ");
+                        adminView.cadastrarProjeto(titulo, idCli, data);
+                        System.out.println("✅ Salvo!");
+                    }
                 }
                 case 2 -> listarProjetos();
                 case 3 -> {
                     listarProjetos();
-                    Projeto p = adminView.buscarProjetoPorId(ConsoleUtil.lerInt("ID para Editar: "));
-                    if(p != null) {
-                        String nTit = ConsoleUtil.lerString("Novo Título ["+p.getTitulo()+"]: ");
-                        if(!nTit.isEmpty()) p.setTitulo(nTit);
-                        adminView.atualizarProjeto(p);
-                        System.out.println("✅ Atualizado!");
+                    int id = ConsoleUtil.lerInt("ID do Projeto para Editar (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        Projeto p = adminView.buscarProjetoPorId(id);
+                        if(p != null) {
+                            System.out.println("Pressione ENTER sem preencher para manter o dado antigo.");
+
+                            String nTit = ConsoleUtil.lerString("Novo Título [" + p.getTitulo() + "]: ");
+                            if(!nTit.isEmpty()) p.setTitulo(nTit);
+
+                            String nCliStr = ConsoleUtil.lerString("Novo ID do Cliente Vinculado [" + p.getIdCliente() + "]: ");
+                            if(!nCliStr.isEmpty()) p.setIdCliente(Integer.parseInt(nCliStr));
+
+                            System.out.println("Status atual: " + p.getStatus());
+                            System.out.println("1. PLANEJAMENTO | 2. APROVADO | 3. EM EXECUCAO | 4. CONCLUIDO | 0. Manter Atual");
+                            int opStatus = ConsoleUtil.lerInt("Escolha o novo status: ");
+                            switch (opStatus) {
+                                case 1 -> p.setStatus(StatusProjeto.PLANEJAMENTO);
+                                case 2 -> p.setStatus(StatusProjeto.APROVADO);
+                                case 3 -> p.setStatus(StatusProjeto.EM_EXECUCAO);
+                                case 4 -> {
+                                    p.setStatus(StatusProjeto.CONCLUIDO);
+                                    p.setDataPrevisaoConclusao(LocalDate.now()); // Mágica aqui!
+                                    System.out.println("ℹ️ Status alterado para CONCLUÍDO. A data foi definida automaticamente para hoje.");
+                                }
+                            }
+
+                            String rotuloNovaData = p.getStatus() == StatusProjeto.CONCLUIDO ? "Data de Conclusão" : "Nova Data de Previsão";
+                            String dataStr = ConsoleUtil.lerString(rotuloNovaData + " [" + p.getDataPrevisaoConclusao().format(dateFormatter) + "] (dd/MM/yyyy): ");
+                            if(!dataStr.isEmpty()) {
+                                try {
+                                    p.setDataPrevisaoConclusao(LocalDate.parse(dataStr, dateFormatter));
+                                } catch(Exception e) {
+                                    System.out.println("❌ Formato inválido. Data antiga mantida.");
+                                }
+                            }
+
+                            adminView.atualizarProjeto(p);
+                            System.out.println("✅ Projeto atualizado completamente!");
+                        } else { System.out.println("❌ Projeto não encontrado!"); }
                     }
                 }
                 case 4 -> {
                     listarProjetos();
-                    adminView.excluirProjeto(ConsoleUtil.lerInt("ID para Excluir: "));
-                    System.out.println("✅ Excluído!");
+                    int id = ConsoleUtil.lerInt("ID do Projeto para Excluir (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        if(adminView.buscarProjetoPorId(id) != null) {
+                            adminView.excluirProjeto(id);
+                            System.out.println("✅ Excluído!");
+                        } else { System.out.println("❌ Projeto não encontrado!"); }
+                    }
                 }
                 case 5 -> {
-                    String termo = ConsoleUtil.lerString("Digite parte do título: ");
-                    List<Projeto> res = adminView.buscarProjetoPorTitulo(termo);
-                    res.forEach(p -> System.out.printf("ID: %d | Título: %s\n", p.getId(), p.getTitulo()));
+                    String termo = ConsoleUtil.lerString("Digite parte do título (ou '0' para cancelar): ");
+                    if (termo.equals("0")) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        List<Projeto> res = adminView.buscarProjetoPorTitulo(termo);
+                        if(res.isEmpty()) {
+                            System.out.println("Nenhum projeto encontrado.");
+                        } else {
+                            res.forEach(p -> {
+                                Cliente c = adminView.buscarClientePorId(p.getIdCliente());
+                                String nomeCli = (c != null) ? c.getNome() : "Desconhecido";
+                                String rotuloData = p.getStatus() == StatusProjeto.CONCLUIDO ? "Concluído em" : "Previsão";
+                                System.out.printf("ID: %d | Cliente: %s | Título: %s | Status: %s | %s: %s\n",
+                                        p.getId(), nomeCli, p.getTitulo(), p.getStatus(), rotuloData, p.getDataPrevisaoConclusao().format(dateFormatter));
+                            });
+                        }
+                    }
+                }
+                case 6 -> {
+                    System.out.println("Escolha o Status para filtrar:");
+                    System.out.println("1. PLANEJAMENTO | 2. APROVADO | 3. EM EXECUCAO | 4. CONCLUIDO | 0. Cancelar");
+                    int escolha = ConsoleUtil.lerInt("Opção: ");
+                    if (escolha == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        StatusProjeto statusAlvo = null;
+                        switch (escolha) {
+                            case 1 -> statusAlvo = StatusProjeto.PLANEJAMENTO;
+                            case 2 -> statusAlvo = StatusProjeto.APROVADO;
+                            case 3 -> statusAlvo = StatusProjeto.EM_EXECUCAO;
+                            case 4 -> statusAlvo = StatusProjeto.CONCLUIDO;
+                        }
+                        if(statusAlvo != null) {
+                            System.out.println("\n-- RESULTADO DO FILTRO POR STATUS --");
+                            List<Projeto> filtrados = adminView.buscarProjetoPorStatus(statusAlvo);
+                            if(filtrados.isEmpty()) { System.out.println("Nenhum projeto encontrado com este status."); }
+                            else {
+                                filtrados.forEach(p -> {
+                                    Cliente c = adminView.buscarClientePorId(p.getIdCliente());
+                                    String nomeCli = (c != null) ? c.getNome() : "Desconhecido";
+                                    String rotuloData = p.getStatus() == StatusProjeto.CONCLUIDO ? "Concluído em" : "Previsão";
+                                    System.out.printf("ID: %d | Cliente: %s | Título: %s | %s: %s\n",
+                                            p.getId(), nomeCli, p.getTitulo(), rotuloData, p.getDataPrevisaoConclusao().format(dateFormatter));
+                                });
+                            }
+                        } else { System.out.println("❌ Seleção inválida."); }
+                    }
                 }
             }
         }
     }
+
+    // UX: Mostra NOME do Cliente e Rótulo de Data Dinâmico
     private void listarProjetos() {
-        adminView.listarTodosProjetos().forEach(p -> System.out.printf("ID: %d | Cliente ID: %d | Titulo: %s\n", p.getId(), p.getIdCliente(), p.getTitulo()));
+        System.out.println("\n-- LISTA GLOBAL DE PROJETOS --");
+        adminView.listarTodosProjetos().forEach(p -> {
+            Cliente c = adminView.buscarClientePorId(p.getIdCliente());
+            String nomeCliente = (c != null) ? c.getNome() : "Desconhecido";
+            String rotuloData = p.getStatus() == StatusProjeto.CONCLUIDO ? "Concluído em" : "Previsão";
+
+            System.out.printf("ID: %d | Cliente: %s | Título: %s | Status: %s | %s: %s\n",
+                    p.getId(), nomeCliente, p.getTitulo(), p.getStatus(), rotuloData, p.getDataPrevisaoConclusao().format(dateFormatter));
+        });
     }
 
     // ==========================================
@@ -146,33 +272,57 @@ public class ArquitetoTemplate {
             op = ConsoleUtil.lerInt("Opção: ");
             switch(op) {
                 case 1 -> {
-                    int idProj = ConsoleUtil.lerInt("ID do Projeto: ");
-                    String desc = ConsoleUtil.lerString("Descrição da Etapa: ");
-                    var data = ConsoleUtil.lerData("Data Limite (dd/MM/yyyy): ");
-                    adminView.cadastrarEtapa(idProj, desc, data);
-                    System.out.println("✅ Salvo!");
+                    listarProjetos();
+                    ConsoleUtil.pularLinha();
+                    int idProj = ConsoleUtil.lerInt("ID do Projeto Vinculado (0 para cancelar): ");
+                    if (idProj == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        String desc = ConsoleUtil.lerString("Descrição da Etapa: ");
+                        var data = ConsoleUtil.lerData("Data Limite (dd/MM/yyyy): ");
+                        adminView.cadastrarEtapa(idProj, desc, data);
+                        System.out.println("✅ Salvo!");
+                    }
                 }
                 case 2 -> listarEtapas();
                 case 3 -> {
                     listarEtapas();
-                    Etapa e = adminView.buscarEtapaPorId(ConsoleUtil.lerInt("ID para Editar: "));
-                    if(e != null) {
-                        String nDesc = ConsoleUtil.lerString("Nova Descrição ["+e.getDescricao()+"]: ");
-                        if(!nDesc.isEmpty()) e.setDescricao(nDesc);
-                        adminView.atualizarEtapa(e);
-                        System.out.println("✅ Atualizado!");
+                    int id = ConsoleUtil.lerInt("ID da Etapa para Editar (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        Etapa e = adminView.buscarEtapaPorId(id);
+                        if(e != null) {
+                            String nDesc = ConsoleUtil.lerString("Nova Descrição ["+e.getDescricao()+"]: ");
+                            if(!nDesc.isEmpty()) e.setDescricao(nDesc);
+                            adminView.atualizarEtapa(e);
+                            System.out.println("✅ Atualizado!");
+                        } else { System.out.println("❌ Etapa não encontrada!"); }
                     }
                 }
                 case 4 -> {
                     listarEtapas();
-                    adminView.excluirEtapa(ConsoleUtil.lerInt("ID para Excluir: "));
-                    System.out.println("✅ Excluído!");
+                    int id = ConsoleUtil.lerInt("ID da Etapa para Excluir (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        if(adminView.buscarEtapaPorId(id) != null) {
+                            adminView.excluirEtapa(id);
+                            System.out.println("✅ Excluído!");
+                        } else { System.out.println("❌ Etapa não encontrada!"); }
+                    }
                 }
             }
         }
     }
     private void listarEtapas() {
-        adminView.listarTodasEtapas().forEach(e -> System.out.printf("ID: %d | Proj ID: %d | Desc: %s\n", e.getId(), e.getIdProjeto(), e.getDescricao()));
+        System.out.println("\n-- LISTA DE ETAPAS --");
+        adminView.listarTodasEtapas().forEach(e -> {
+            Projeto p = adminView.buscarProjetoPorId(e.getIdProjeto());
+            String tituloProjeto = (p != null) ? p.getTitulo() : "Desconhecido";
+            System.out.printf("ID: %d | Projeto: %s | Desc: %s | Prazo: %s\n",
+                    e.getId(), tituloProjeto, e.getDescricao(), e.getDataLimite().format(dateFormatter));
+        });
     }
 
     // ==========================================
@@ -194,27 +344,49 @@ public class ArquitetoTemplate {
                 case 2 -> listarServ();
                 case 3 -> {
                     listarServ();
-                    Servico s = adminView.buscarServicoPorId(ConsoleUtil.lerInt("ID para Editar: "));
-                    if(s != null) {
-                        String nDesc = ConsoleUtil.lerString("Nova Descrição ["+s.getDescricao()+"]: ");
-                        if(!nDesc.isEmpty()) s.setDescricao(nDesc);
-                        adminView.atualizarServico(s);
-                        System.out.println("✅ Atualizado!");
+                    int id = ConsoleUtil.lerInt("ID do Serviço para Editar (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        Servico s = adminView.buscarServicoPorId(id);
+                        if(s != null) {
+                            String nDesc = ConsoleUtil.lerString("Nova Descrição ["+s.getDescricao()+"]: ");
+                            if(!nDesc.isEmpty()) s.setDescricao(nDesc);
+                            adminView.atualizarServico(s);
+                            System.out.println("✅ Atualizado!");
+                        } else { System.out.println("❌ Serviço não encontrado!"); }
                     }
                 }
                 case 4 -> {
                     listarServ();
-                    adminView.excluirServico(ConsoleUtil.lerInt("ID para Excluir: "));
-                    System.out.println("✅ Excluído!");
+                    int id = ConsoleUtil.lerInt("ID do Serviço para Excluir (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        if(adminView.buscarServicoPorId(id) != null) {
+                            adminView.excluirServico(id);
+                            System.out.println("✅ Excluído!");
+                        } else { System.out.println("❌ Serviço não encontrado!"); }
+                    }
                 }
                 case 5 -> {
-                    String termo = ConsoleUtil.lerString("Digite parte da descrição: ");
-                    adminView.buscarServicoPorDescricao(termo).forEach(s -> System.out.printf("ID: %d | Desc: %s\n", s.getId(), s.getDescricao()));
+                    String termo = ConsoleUtil.lerString("Digite parte da descrição (ou '0' para cancelar): ");
+                    if (termo.equals("0")) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        List<Servico> res = adminView.buscarServicoPorDescricao(termo);
+                        if(res.isEmpty()) {
+                            System.out.println("Nenhum serviço encontrado.");
+                        } else {
+                            res.forEach(s -> System.out.printf("ID: %d | Desc: %s | R$%.2f\n", s.getId(), s.getDescricao(), s.getValorMedida()));
+                        }
+                    }
                 }
             }
         }
     }
     private void listarServ() {
+        System.out.println("\n-- CATÁLOGO DE SERVIÇOS --");
         adminView.listarCatalogoServicos().forEach(s -> System.out.printf("ID: %d | Desc: %s | R$%.2f\n", s.getId(), s.getDescricao(), s.getValorMedida()));
     }
 
@@ -229,16 +401,50 @@ public class ArquitetoTemplate {
             op = ConsoleUtil.lerInt("Opção: ");
             switch(op) {
                 case 1 -> {
-                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa: ");
-                    int idServ = ConsoleUtil.lerInt("ID do Serviço: ");
-                    double qtd = ConsoleUtil.lerDouble("Quantidade/Área (Ex: 10.5): ");
-                    adminView.vincularServico(idEtapa, idServ, qtd);
-                    System.out.println("✅ Vinculado com sucesso!");
+                    listarEtapas();
+                    listarServ();
+                    ConsoleUtil.pularLinha();
+                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa Escolhida (0 para cancelar): ");
+                    if (idEtapa == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        int idServ = ConsoleUtil.lerInt("ID do Serviço Escolhido (0 para cancelar): ");
+                        if (idServ == 0) {
+                            System.out.println("Operação cancelada.");
+                        } else {
+                            double qtd = ConsoleUtil.lerDouble("Medida/Área a ser executada nesta etapa em m² (Ex: 10.5): ");
+                            adminView.vincularServico(idEtapa, idServ, qtd);
+                            System.out.println("✅ Vinculado com sucesso!");
+                        }
+                    }
                 }
-                case 2 -> adminView.listarVinculos().forEach(v -> System.out.printf("Vínculo ID: %d | Etapa: %d | Serviço: %d | Qtd: %.2f\n", v.getId(), v.getIdEtapa(), v.getIdServico(), v.getQuantidade()));
-                case 3 -> adminView.excluirVinculo(ConsoleUtil.lerInt("ID do Vínculo a Excluir: "));
+                case 2 -> listarVinculos();
+                case 3 -> {
+                    listarVinculos();
+                    int id = ConsoleUtil.lerInt("ID do Vínculo a Excluir (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        if(adminView.buscarVinculoPorId(id) != null) {
+                            adminView.excluirVinculo(id);
+                            System.out.println("✅ Vínculo removido!");
+                        } else { System.out.println("❌ Vínculo não encontrado!"); }
+                    }
+                }
             }
         }
+    }
+
+    private void listarVinculos() {
+        System.out.println("\n-- VÍNCULOS ETAPA-SERVIÇO EXISTENTES --");
+        adminView.listarVinculos().forEach(v -> {
+            Etapa e = adminView.buscarEtapaPorId(v.getIdEtapa());
+            Servico s = adminView.buscarServicoPorId(v.getIdServico());
+            String descEtapa = (e != null) ? e.getDescricao() : "Desconhecida";
+            String descServico = (s != null) ? s.getDescricao() : "Desconhecido";
+            System.out.printf("Vínculo ID: %d | Etapa: %s | Serviço: %s | Medida/Área: %.2f m²\n",
+                    v.getId(), descEtapa, descServico, v.getQuantidade());
+        });
     }
 
     // ==========================================
@@ -252,26 +458,59 @@ public class ArquitetoTemplate {
             op = ConsoleUtil.lerInt("Opção: ");
             switch(op) {
                 case 1 -> {
-                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa: ");
-                    String desc = ConsoleUtil.lerString("Material: ");
-                    double qtd = ConsoleUtil.lerDouble("Quantidade: ");
-                    String un = ConsoleUtil.lerString("Unidade (Ex: Saco, Litro): ");
-                    adminView.cadastrarMaterial(idEtapa, desc, qtd, un);
-                    System.out.println("✅ Salvo!");
-                }
-                case 2 -> adminView.listarMateriais().forEach(m -> System.out.printf("ID: %d | Etapa ID: %d | Material: %s | Qtd: %.2f %s\n", m.getId(), m.getIdEtapa(), m.getDescricao(), m.getQuantidade(), m.getUnidade()));
-                case 3 -> {
-                    Material m = adminView.buscarMaterialPorId(ConsoleUtil.lerInt("ID para Editar: "));
-                    if(m != null) {
-                        String nDesc = ConsoleUtil.lerString("Nova Descrição ["+m.getDescricao()+"]: ");
-                        if(!nDesc.isEmpty()) m.setDescricao(nDesc);
-                        adminView.atualizarMaterial(m);
-                        System.out.println("✅ Atualizado!");
+                    listarEtapas();
+                    ConsoleUtil.pularLinha();
+                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa Destino (0 para cancelar): ");
+                    if (idEtapa == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        String desc = ConsoleUtil.lerString("Descrição do Material: ");
+                        double qtd = ConsoleUtil.lerDouble("Quantidade Necessária: ");
+                        String un = ConsoleUtil.lerString("Unidade (Ex: Saco, Litro, Un): ");
+                        adminView.cadastrarMaterial(idEtapa, desc, qtd, un);
+                        System.out.println("✅ Salvo!");
                     }
                 }
-                case 4 -> adminView.excluirMaterial(ConsoleUtil.lerInt("ID para Excluir: "));
+                case 2 -> listarMateriais();
+                case 3 -> {
+                    listarMateriais();
+                    int id = ConsoleUtil.lerInt("ID do Material para Editar (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        Material m = adminView.buscarMaterialPorId(id);
+                        if(m != null) {
+                            String nDesc = ConsoleUtil.lerString("Nova Descrição ["+m.getDescricao()+"]: ");
+                            if(!nDesc.isEmpty()) m.setDescricao(nDesc);
+                            adminView.atualizarMaterial(m);
+                            System.out.println("✅ Atualizado!");
+                        } else { System.out.println("❌ Material não encontrado!"); }
+                    }
+                }
+                case 4 -> {
+                    listarMateriais();
+                    int id = ConsoleUtil.lerInt("ID do Material para Excluir (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        if(adminView.buscarMaterialPorId(id) != null) {
+                            adminView.excluirMaterial(id);
+                            System.out.println("✅ Excluído!");
+                        } else { System.out.println("❌ Material não encontrado!"); }
+                    }
+                }
             }
         }
+    }
+
+    private void listarMateriais() {
+        System.out.println("\n-- LISTA DE MATERIAIS ALOCADOS --");
+        adminView.listarMateriais().forEach(m -> {
+            Etapa e = adminView.buscarEtapaPorId(m.getIdEtapa());
+            String descEtapa = (e != null) ? e.getDescricao() : "Desconhecida";
+            System.out.printf("ID: %d | Etapa: %s | Material: %s | Quantidade: %.2f %s\n",
+                    m.getId(), descEtapa, m.getDescricao(), m.getQuantidade(), m.getUnidade());
+        });
     }
 
     // ==========================================
@@ -285,24 +524,57 @@ public class ArquitetoTemplate {
             op = ConsoleUtil.lerInt("Opção: ");
             switch(op) {
                 case 1 -> {
-                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa: ");
-                    String nome = ConsoleUtil.lerString("Nome da Empresa: ");
-                    String cnpj = ConsoleUtil.lerString("CNPJ: ");
-                    adminView.cadastrarEmpreiteiro(idEtapa, nome, cnpj);
-                    System.out.println("✅ Salvo!");
-                }
-                case 2 -> adminView.listarEmpreiteiros().forEach(e -> System.out.printf("ID: %d | Etapa ID: %d | Empresa: %s | CNPJ: %s\n", e.getId(), e.getIdEtapa(), e.getNomeEmpresa(), e.getCnpj()));
-                case 3 -> {
-                    Empreiteiro e = adminView.buscarEmpreiteiroPorId(ConsoleUtil.lerInt("ID para Editar: "));
-                    if(e != null) {
-                        String nNome = ConsoleUtil.lerString("Nova Empresa ["+e.getNomeEmpresa()+"]: ");
-                        if(!nNome.isEmpty()) e.setNomeEmpresa(nNome);
-                        adminView.atualizarEmpreiteiro(e);
-                        System.out.println("✅ Atualizado!");
+                    listarEtapas();
+                    ConsoleUtil.pularLinha();
+                    int idEtapa = ConsoleUtil.lerInt("ID da Etapa sob Responsabilidade (0 para cancelar): ");
+                    if (idEtapa == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        String nome = ConsoleUtil.lerString("Nome da Empresa/Empreiteiro: ");
+                        String cnpj = ConsoleUtil.lerString("CNPJ: ");
+                        adminView.cadastrarEmpreiteiro(idEtapa, nome, cnpj);
+                        System.out.println("✅ Salvo!");
                     }
                 }
-                case 4 -> adminView.excluirEmpreiteiro(ConsoleUtil.lerInt("ID para Excluir: "));
+                case 2 -> listarEmpreiteiros();
+                case 3 -> {
+                    listarEmpreiteiros();
+                    int id = ConsoleUtil.lerInt("ID do Empreiteiro para Editar (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        Empreiteiro e = adminView.buscarEmpreiteiroPorId(id);
+                        if(e != null) {
+                            String nNome = ConsoleUtil.lerString("Nova Empresa ["+e.getNomeEmpresa()+"]: ");
+                            if(!nNome.isEmpty()) e.setNomeEmpresa(nNome);
+                            adminView.atualizarEmpreiteiro(e);
+                            System.out.println("✅ Atualizado!");
+                        } else { System.out.println("❌ Empreiteiro não encontrado!"); }
+                    }
+                }
+                case 4 -> {
+                    listarEmpreiteiros();
+                    int id = ConsoleUtil.lerInt("ID do Empreiteiro para Excluir (0 para cancelar): ");
+                    if (id == 0) {
+                        System.out.println("Operação cancelada.");
+                    } else {
+                        if(adminView.buscarEmpreiteiroPorId(id) != null) {
+                            adminView.excluirEmpreiteiro(id);
+                            System.out.println("✅ Excluído!");
+                        } else { System.out.println("❌ Empreiteiro não encontrado!"); }
+                    }
+                }
             }
         }
+    }
+
+    private void listarEmpreiteiros() {
+        System.out.println("\n-- LISTA DE EMPREITEIROS CONTRATADOS --");
+        adminView.listarEmpreiteiros().forEach(emp -> {
+            Etapa e = adminView.buscarEtapaPorId(emp.getIdEtapa());
+            String descEtapa = (e != null) ? e.getDescricao() : "Desconhecida";
+            System.out.printf("ID: %d | Etapa: %s | Empresa: %s | CNPJ: %s\n",
+                    emp.getId(), descEtapa, emp.getNomeEmpresa(), emp.getCnpj());
+        });
     }
 }
