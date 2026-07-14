@@ -1,15 +1,17 @@
 package model.entities;
 
 public class Empreiteiro extends Entidade {
+    private int idEtapa;
     private String nomeEmpresa;
     private String cnpj;
-
-    public Empreiteiro(int id, String nomeEmpresa, String cnpj) {
+    public Empreiteiro(int id, int idEtapa, String nomeEmpresa, String cnpj) {
         super(id);
-        this.nomeEmpresa = nomeEmpresa;
-        this.cnpj = cnpj;
+        setIdEtapa(idEtapa);
+        setNomeEmpresa(nomeEmpresa);
+        setCnpj(cnpj);
     }
-
+    public int getIdEtapa() { return idEtapa; }
+    public void setIdEtapa(int idEtapa) { this.idEtapa = idEtapa; }
     public String getNomeEmpresa() { return nomeEmpresa; }
     public void setNomeEmpresa(String nomeEmpresa) { this.nomeEmpresa = nomeEmpresa; }
     public String getCnpj() { return cnpj; }

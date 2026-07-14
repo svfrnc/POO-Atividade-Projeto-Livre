@@ -1,25 +1,23 @@
 package model.entities;
 
 public class Material extends Entidade {
+    private int idEtapa;
     private String descricao;
-    private int quantidade;
+    private double quantidade;
     private String unidade;
-    private int idAmbiente;
-
-    public Material(int id, String descricao, int quantidade, String unidade, int idAmbiente) {
+    public Material(int id, int idEtapa, String descricao, double quantidade, String unidade) {
         super(id);
-        this.descricao = descricao;
-        this.quantidade = quantidade;
-        this.unidade = unidade;
-        this.idAmbiente = idAmbiente;
+        setIdEtapa(idEtapa);
+        setDescricao(descricao);
+        setQuantidade(quantidade);
+        setUnidade(unidade);
     }
-
+    public int getIdEtapa() { return idEtapa; }
+    public void setIdEtapa(int idEtapa) { this.idEtapa = idEtapa; }
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
-    public int getQuantidade() { return quantidade; }
-    public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
+    public double getQuantidade() { return quantidade; }
+    public void setQuantidade(double quantidade) { this.quantidade = quantidade; }
     public String getUnidade() { return unidade; }
     public void setUnidade(String unidade) { this.unidade = unidade; }
-    public int getIdAmbiente() { return idAmbiente; }
-    public void setIdAmbiente(int idAmbiente) { this.idAmbiente = idAmbiente; }
 }

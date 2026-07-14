@@ -1,10 +1,8 @@
 package model.dao;
 import com.google.gson.reflect.TypeToken;
 import model.entities.Cliente;
-import java.util.ArrayList;
+import java.util.List;
 
 public class ClienteDAO extends DAO<Cliente> {
-    public ClienteDAO() {
-        super("src/main/java/data/clientes.json", new TypeToken<ArrayList<Cliente>>(){}.getType());
-    }
+    public ClienteDAO() { super("clientes.json", new TypeToken<List<Cliente>>(){}.getType()); }
 }

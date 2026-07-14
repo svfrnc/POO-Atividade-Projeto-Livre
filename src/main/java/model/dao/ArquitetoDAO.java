@@ -1,10 +1,8 @@
 package model.dao;
 import com.google.gson.reflect.TypeToken;
 import model.entities.Arquiteto;
-import java.util.ArrayList;
+import java.util.List;
 
 public class ArquitetoDAO extends DAO<Arquiteto> {
-    public ArquitetoDAO() {
-        super("src/main/java/data/arquitetos.json", new TypeToken<ArrayList<Arquiteto>>(){}.getType());
-    }
+    public ArquitetoDAO() { super("arquitetos.json", new TypeToken<List<Arquiteto>>(){}.getType()); }
 }

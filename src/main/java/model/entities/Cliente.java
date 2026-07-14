@@ -1,19 +1,15 @@
 package model.entities;
-
 import model.enums.TipoPerfil;
 
 public class Cliente extends Usuario {
-    private String cpf;
-    private String telefone;
-
-    public Cliente(int id, String login, String senha, TipoPerfil tipoPerfil, String cpf, String telefone) {
-        super(id, login, senha, tipoPerfil);
-        this.cpf = cpf;
-        this.telefone = telefone;
+    private String nome;
+    public Cliente(int id, String login, String senha, String nome) {
+        super(id, login, senha, TipoPerfil.COMUM);
+        setNome(nome);
     }
-
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
-    public String getTelefone() { return telefone; }
-    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getNome() { return nome; }
+    public void setNome(String nome) {
+        if (nome == null || nome.trim().isEmpty()) throw new IllegalArgumentException("Nome inválido.");
+        this.nome = nome;
+    }
 }

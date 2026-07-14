@@ -1,6 +1,3 @@
 package model.enums;
 
-public enum TipoPerfil {
-    ADMIN,
-    COMUM
-}
+public enum TipoPerfil { ADMIN, COMUM }
