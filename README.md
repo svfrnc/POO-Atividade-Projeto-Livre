@@ -89,13 +89,6 @@ Ilustra as classes do tipo Data Access Object (DAO) responsáveis por salvar e c
 2. Clone este repositório.
 3. Atualize o projeto Maven para baixar as dependências (`pom.xml`), em especial a biblioteca **Gson**.
 4. Execute a classe principal da aplicação para iniciar a interface de linha de comando (CLI).
-# ARQBUILD - Sistema de Gerenciamento de Projetos Arquitetônicos
-
-O **ARQBUILD** é uma aplicação desenvolvida em Java estruturada sob o paradigma de Programação Orientada a Objetos (POO), que atua de forma a centralizar as informações cruciais de uma obra (como o escopo, materiais e serviços) e facilitar o gerenciamento de etapas de projetos arquitetônicos, aproximando a comunicação entre profissionais (arquitetos/técnicos) e clientes finais.
-
-Este repositório foi atualizado com as modificações estruturais da **segunda entrega**, consolidando a evolução da arquitetura do sistema e as melhorias em persistência e regras de negócio.
-
----
 
 # ARQBUILD - Sistema de Gerenciamento de Projetos Arquitetônicos
 
